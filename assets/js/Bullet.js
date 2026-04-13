@@ -13,7 +13,7 @@ export default class Bullet extends Phaser.Physics.Matter.Sprite{
         if(shooter==this.scene.player) this.moveTo(target.worldX,target.worldY);
         else this.moveTo(target.x,target.y);
         this.on("collide",function(bullet,other){
-            if(shooter.body.label=="Player" && other.label!="Player"){                      
+            if(other.label!="Heal" && shooter.body.label=="Player" && other.label!="Player"){                      
                 if(other.gameObject!=null && other.label=="Enemy"){
                     other.gameObject.getHit(self.damage);      
                     if(shooter.activeWeapon=="shotgun" && other.gameObject!=null){
@@ -29,7 +29,7 @@ export default class Bullet extends Phaser.Physics.Matter.Sprite{
                     self.setActive(false).setVisible(false);
                     self.destroy();
                 });
-            }else if(shooter.body.label=="Turret" && other.label!="Turret" && other.label!="TurretBase" && other.label!="Player"){
+            }else if(other.label!="Heal" && shooter.body.label=="Turret" && other.label!="Turret" && other.label!="TurretBase" && other.label!="Player"){
                 if(other.gameObject!=null && other.label=="Enemy"){
                     other.gameObject.getHit(self.damage);
                 }

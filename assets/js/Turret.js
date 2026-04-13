@@ -9,6 +9,7 @@ export default class Turret extends Phaser.Physics.Matter.Sprite{
         this.tb=tb;
         this.target=null;
         this.shooting=false;
+        this.turretShot=this.scene.sound.add("turretShot",{volume:0.3});
     }
 
     static preload(scene){
@@ -16,6 +17,7 @@ export default class Turret extends Phaser.Physics.Matter.Sprite{
         scene.load.animation("turret_idle","/assets/Turret/turret_idle_anim.json");
         scene.load.atlas("turret_fire","/assets/Turret/turret_fire.png","/assets/Turret/turret_fire_atlas.json");
         scene.load.animation("turret_fire","/assets/Turret/turret_fire_anim.json");
+        scene.load.audio("turretShot","assets/Audio/TurretShooting.mp3");
     }
     update(){
         if(this.target!=null && !(this.inRange(this.target,attackRange)) || this.target!=null && !this.target.isAlive()){
@@ -34,6 +36,7 @@ export default class Turret extends Phaser.Physics.Matter.Sprite{
             this.on("animationcomplete",()=>{
                 if(this.shooting){
                     if(this.target!=null){
+                        this.turretShot.play();
                         var bulletShot=new Bullet({scene:this.scene,x:this.getCenter().x,y:this.getCenter().y,texture:"bullet",frame:"bullet"},1);
                         bulletShot.create(this,this.target);
                     }

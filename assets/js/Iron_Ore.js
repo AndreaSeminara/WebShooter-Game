@@ -25,10 +25,8 @@ export default class IronOre extends Phaser.Physics.Matter.Sprite{
         this.bar.fillStyle(0xffff00);
         this.bar.fillRect(this.x-23,this.y+2,this.value,12);
     }
-    removeProgBar(d){
-        console.log(d);        
+    removeProgBar(d){     
         delay(d).then(() =>{
-            console.log("removed");
             this.bar.setActive(false).setVisible(false);
         });
     }

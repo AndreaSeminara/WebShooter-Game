@@ -8,7 +8,7 @@ export default class MainMenu extends Phaser.Scene{
     create(){
         this.menuImage=this.add.image(this.cameras.main.displayWidth/2,this.cameras.main.displayHeight/2,"menuImage");
         this.menuImage.setDisplaySize(this.cameras.main.displayWidth,this.cameras.main.displayHeight);
-        this.title=this.add.text(this.cameras.main.displayWidth/2-410,5,"PROGETTO WEB",{font:"100px Arial",fill:"orange",stroke:"black",strokeThickness:5});
+        this.title=this.add.text(this.cameras.main.displayWidth/2-400,20,"SURVIVAL SHOOTER",{font:"80px Arial",fill:"orange",stroke:"black",strokeThickness:5});
 
         this.singleplayerButton=this.add.rectangle(this.cameras.main.displayWidth/2,this.cameras.main.displayHeight/2-100,500,100,0xffffff,"0.2");
         this.singleplayerText=this.add.text(this.singleplayerButton.getCenter().x-140,this.singleplayerButton.getCenter().y-30,"Singleplayer",{font:"50px Arial",fill:"white",stroke:"black",strokeThickness:5});
@@ -31,7 +31,7 @@ export default class MainMenu extends Phaser.Scene{
         });
 
         this.multiplayerButton.on("pointerdown",()=>{  
-            this.game.scene.start("WaitingRoom");                    
+            this.game.scene.start("WaitingRoom");        
             this.game.scene.stop("MainMenu");
         });
         this.multiplayerButton.on("pointerover",()=>{            
@@ -47,8 +47,8 @@ export default class MainMenu extends Phaser.Scene{
             this.menuImage.y=this.cameras.main.displayHeight/2;
             this.menuImage.setDisplaySize(this.cameras.main.displayWidth,this.cameras.main.displayHeight);
         }
-        if(this.title.x!=this.cameras.main.displayWidth/2-410){
-            this.title.x=this.cameras.main.displayWidth/2-410;
+        if(this.title.x!=this.cameras.main.displayWidth/2-400){
+            this.title.x=this.cameras.main.displayWidth/2-400;
         }
         
         if(this.singleplayerButton.x!=this.cameras.main.displayWidth/2 || this.singleplayerButton.y!=this.cameras.main.displayHeight/2-100){

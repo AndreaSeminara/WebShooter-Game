@@ -121,7 +121,27 @@ export default class MainScene extends Phaser.Scene{
     getSpawnable(){
         return this.Spawnable;
     }
-
+    backToMenuButton(){
+        this.backToMenu=this.add.rectangle(this.cameras.main.displayWidth/2,this.cameras.main.displayHeight/2+125,300,50,"black","0.8");
+        this.backToMenu.scrollFactorX=0;
+        this.backToMenu.scrollFactorY=0;
+        this.backToMenu.setStrokeStyle(2,0x808080);
+        this.backToMenuText=this.add.text(this.backToMenu.getCenter().x-115,this.backToMenu.getCenter().y-17,"BACK TO MENU",{font:"30px Arial",fill:"lightgray",stroke:"gray",strokeThickness:2});
+        this.backToMenuText.scrollFactorX=0;
+        this.backToMenuText.scrollFactorY=0;
+        this.backToMenu.setInteractive();
+        this.backToMenu.on("pointerdown",()=>{          
+            this.game.scene.run("MainMenu"); 
+            this.game.scene.stop("PauseMenu");
+            this.game.scene.stop("MainScene");
+        });
+        this.backToMenu.on("pointerover",()=>{            
+            this.backToMenu.setFillStyle(0x262626,0.9);
+        });
+        this.backToMenu.on("pointerout",()=>{
+            this.backToMenu.setFillStyle(0x000000,0.8);
+        });
+    }
     
 }
 var nextWaveText;

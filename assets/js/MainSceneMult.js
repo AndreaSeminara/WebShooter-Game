@@ -312,10 +312,6 @@ export default class MainSceneMult extends Phaser.Scene{
                 }
                 if(playerStillAlive==1){
                     this.player.victoryScreen();
-                    delay(3000).then(()=>{
-                        this.game.scene.start("MainMenu");
-                        this.game.scene.stop("MainSceneMult");
-                    });
                 }
             }
         });
@@ -387,6 +383,18 @@ export default class MainSceneMult extends Phaser.Scene{
         if(this.inputKeys.pause.isDown){
             this.game.scene.start("PauseMenuMult",{socket:this.socket});
         }
+        if(this.backToMenu!=null){           
+            if(this.backToMenu.x!=this.cameras.main.displayWidth/2 || this.backToMenu.y!=this.cameras.main.displayHeight/2+125){
+                this.backToMenu.x=this.cameras.main.displayWidth/2 ;
+                this.backToMenu.y=this.cameras.main.displayHeight/2+125;
+            }
+        }
+        if(this.backToMenuText!=null){           
+            if(this.backToMenuText.x!=this.backToMenu.getCenter().x-115 || this.backToMenuText.y!=this.backToMenu.getCenter().y-17){
+                this.backToMenuText.x=this.backToMenu.getCenter().x-115;
+                this.backToMenuText.y=this.backToMenu.getCenter().y-17;
+            }
+        }
     }
 
     
@@ -433,7 +441,7 @@ export default class MainSceneMult extends Phaser.Scene{
         for(let i=0;i<others.length;i++){
             if(others[i]==this.socket.id) continue;
             if(this.assignColors[i]=="Red"){
-                this.redPlayer=new Phaser.Physics.Matter.Sprite(this.matter.world,1200, 2250, 'handgun_idle',"survivor-idle_handgun_0",{label:"RedPlayer"}).setScale(0.3);
+                this.redPlayer=new Phaser.Physics.Matter.Sprite(this.matter.world,1200, 2250, 'handgun_idle',"survivor-idle_handgun_0",{label:"RedPlayer",circleRadius:80}).setScale(0.3);
                 this.redPlayer.anims.play("handgun_idle",true);
                 this.add.existing(this.redPlayer);
                 this.redPlayerActiveWeapon="handgun";
@@ -443,7 +451,7 @@ export default class MainSceneMult extends Phaser.Scene{
                 this.redPlayerMining=false;
             }
             else if(this.assignColors[i]=="Green"){
-                this.greenPlayer=new Phaser.Physics.Matter.Sprite(this.matter.world,120, 1200, 'handgun_idle',"survivor-idle_handgun_0",{label:"GreenPlayer"}).setScale(0.3);
+                this.greenPlayer=new Phaser.Physics.Matter.Sprite(this.matter.world,120, 1200, 'handgun_idle',"survivor-idle_handgun_0",{label:"GreenPlayer",circleRadius:80}).setScale(0.3);
                 this.greenPlayer.anims.play("handgun_idle",true);
                 this.add.existing(this.greenPlayer);
                 this.greenPlayer.setStatic(true);
@@ -453,7 +461,7 @@ export default class MainSceneMult extends Phaser.Scene{
                 this.greenPlayerMining=false;
             }
             else if(this.assignColors[i]=="Yellow"){
-                this.yellowPlayer=new Phaser.Physics.Matter.Sprite(this.matter.world,1200, 120, 'handgun_idle',"survivor-idle_handgun_0",{label:"YellowPlayer"}).setScale(0.3);
+                this.yellowPlayer=new Phaser.Physics.Matter.Sprite(this.matter.world,1200, 120, 'handgun_idle',"survivor-idle_handgun_0",{label:"YellowPlayer",circleRadius:80}).setScale(0.3);
                 this.yellowPlayer.anims.play("handgun_idle",true);
                 this.add.existing(this.yellowPlayer);
                 this.yellowPlayer.setStatic(true);
@@ -463,7 +471,7 @@ export default class MainSceneMult extends Phaser.Scene{
                 this.yellowPlayerMining=false;
             }
             else if(this.assignColors[i]=="Blue"){
-                this.bluePlayer=new Phaser.Physics.Matter.Sprite(this.matter.world,2250, 1200, 'handgun_idle',"survivor-idle_handgun_0",{label:"BluePlayer"}).setScale(0.3);
+                this.bluePlayer=new Phaser.Physics.Matter.Sprite(this.matter.world,2250, 1200, 'handgun_idle',"survivor-idle_handgun_0",{label:"BluePlayer",circleRadius:80}).setScale(0.3);
                 this.add.existing(this.bluePlayer);
                 this.bluePlayer.anims.play("handgun_idle",true);
                 this.bluePlayer.setStatic(true);
@@ -498,6 +506,29 @@ export default class MainSceneMult extends Phaser.Scene{
         else if(color.includes("Green")) return this.playersId[this.assignColors.indexOf("Green")];
         else if(color.includes("Yellow")) return this.playersId[this.assignColors.indexOf("Yellow")];
         else if(color.includes("Blue")) return this.playersId[this.assignColors.indexOf("Blue")];
+    }
+    
+    backToMenuButton(){
+        this.backToMenu=this.add.rectangle(this.cameras.main.displayWidth/2,this.cameras.main.displayHeight/2+125,300,50,"black","0.8");
+        this.backToMenu.scrollFactorX=0;
+        this.backToMenu.scrollFactorY=0;
+        this.backToMenu.setStrokeStyle(2,0x808080);
+        this.backToMenuText=this.add.text(this.backToMenu.getCenter().x-115,this.backToMenu.getCenter().y-17,"BACK TO MENU",{font:"30px Arial",fill:"lightgray",stroke:"gray",strokeThickness:2});
+        this.backToMenuText.scrollFactorX=0;
+        this.backToMenuText.scrollFactorY=0;
+        this.backToMenu.setInteractive();
+        this.backToMenu.on("pointerdown",()=>{          
+            this.game.scene.run("MainMenu");
+            this.socket.disconnect();  
+            this.game.scene.stop("PauseMenuMult");
+            this.game.scene.stop("MainSceneMult");
+        });
+        this.backToMenu.on("pointerover",()=>{            
+            this.backToMenu.setFillStyle(0x262626,0.9);
+        });
+        this.backToMenu.on("pointerout",()=>{
+            this.backToMenu.setFillStyle(0x000000,0.8);
+        });
     }
 }
 

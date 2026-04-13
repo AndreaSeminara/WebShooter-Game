@@ -50,9 +50,9 @@ export default class EnemySpawner{
               
         }
         if(this.victoryText!=null){           
-            if(this.victoryText.x!=this.scene.cameras.main.worldView.x + this.scene.cameras.main.width / 2 || this.victoryText.y!=this.scene.cameras.main.worldView.y + this.scene.cameras.main.height / 2){
-                this.victoryText.x=this.scene.cameras.main.worldView.x + this.scene.cameras.main.width / 2;
-                this.victoryText.y=this.scene.cameras.main.worldView.y + this.scene.cameras.main.height / 2;
+            if(this.victoryText.x!=this.scene.cameras.main.displayWidth/2-220.5 || this.victoryText.y!=this.scene.cameras.main.displayHeight/2-55){
+                this.victoryText.x=this.scene.cameras.main.displayWidth/2-220.5;
+                this.victoryText.y=this.scene.cameras.main.displayHeight/2-55;
             }
         }
         if(this.numberOfEnemiesText!=null){           
@@ -62,7 +62,7 @@ export default class EnemySpawner{
         }
     }
     spawnEnemies(){
-        this.currentWaveEnemies=10*this.currentWave;
+        this.currentWaveEnemies=5*this.currentWave;
         this.enemiesSpawned=new Array(this.currentWaveEnemies);
         var droppers=new Array(this.currentWave);
         for(let i=0;i<droppers.length;i++){
@@ -108,8 +108,10 @@ export default class EnemySpawner{
         }else this.numberOfEnemiesText.setText("Enemies Alive: "+this.getEnemiesAlive()+"/"+this.currentWaveEnemies);
     }    
     victoryScreen(){
-        this.victoryText=this.scene.add.text(this.scene.cameras.main.worldView.x + this.scene.cameras.main.width / 2,this.scene.cameras.main.worldView.y + this.scene.cameras.main.height / 2,"YOU WIN",{font:"100px Arial",fill:"white",stroke:"black",strokeThickness:2}).setOrigin(0.5);
-        this.scene.game.scene.pause("MainScene");
+        this.victoryText=this.scene.add.text(this.scene.cameras.main.displayWidth/2-220.5,this.scene.cameras.main.displayHeight/2-55,"YOU WIN",{font:"100px Arial",fill:"white",stroke:"black",strokeThickness:2});
+        this.victoryText.scrollFactorX=0;
+        this.victoryText.scrollFactorY=0;
+        this.scene.backToMenuButton();
     }
 }
 function onEvent(){

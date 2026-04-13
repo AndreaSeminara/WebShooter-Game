@@ -19,7 +19,7 @@ export default class Player extends Phaser.Physics.Matter.Sprite{
         this.handgun_ammo=12;
         this.rifle_ammo=30;
         this.shotgun_ammo=5;        
-        this.ironOres=5;
+        this.ironOres=0;
         this.oreObj=null;
         this.canMine=true;
         this.mined=false;
@@ -62,7 +62,15 @@ export default class Player extends Phaser.Physics.Matter.Sprite{
         scene.load.atlas("bullet","assets/Player/bullet.png","assets/Player/bullet_atlas.json");
         scene.load.atlas("shotgun_bullet","assets/Player/shotgun_bullet.png","assets/Player/shotgun_bullet_atlas.json");
         scene.load.atlas("player_mining","assets/Player/player_mining.png","assets/Player/player_mining_atlas.json");
-        scene.load.animation("player_mining","assets/Player/player_mining_anim.json");     
+        scene.load.animation("player_mining","assets/Player/player_mining_anim.json");
+        
+        scene.load.audio("playerMining","assets/Audio/PlayerMining.mp3");
+        scene.load.audio("playerHit","assets/Audio/PlayerHit.mp3");
+        scene.load.audio("reload","assets/Audio/Reloading.mp3");
+        scene.load.audio("shotgunShot","assets/Audio/ShotgunShot.mp3");
+        scene.load.audio("rifleShot","assets/Audio/RifleShot.mp3");
+        scene.load.audio("handgunShot","assets/Audio/HandgunShot.mp3");  
+        scene.load.audio("healSound","assets/Audio/Heal.mp3");
     }
     get velocity(){
         return this.body.velocity;
@@ -76,6 +84,7 @@ export default class Player extends Phaser.Physics.Matter.Sprite{
             right:Phaser.Input.Keyboard.KeyCodes.D,
             reload:Phaser.Input.Keyboard.KeyCodes.R,
             interact:Phaser.Input.Keyboard.KeyCodes.E,
+            sprint:Phaser.Input.Keyboard.KeyCodes.SHIFT,
             handgun:Phaser.Input.Keyboard.KeyCodes.ONE,
             rifle:Phaser.Input.Keyboard.KeyCodes.TWO,
             shotgun:Phaser.Input.Keyboard.KeyCodes.THREE
@@ -100,10 +109,18 @@ export default class Player extends Phaser.Physics.Matter.Sprite{
         });             
         this.setFixedRotation();
         this.setScale(0.3);
+        
+        this.reloadSound=this.scene.sound.add("reload",{volume:0.5});
+        this.shotgunShot=this.scene.sound.add("shotgunShot",{volume:0.25});
+        this.rifleShot=this.scene.sound.add("rifleShot",{volume:0.5});
+        this.handgunShot=this.scene.sound.add("handgunShot",{volume:0.2});
+        this.playerHit=this.scene.sound.add("playerHit");
+        this.playerMining=this.scene.sound.add("playerMining");
     }
     update(scene){        
         this.playerHUD.update(scene,scene.cameras.main);
-        if(!this.mining)var speed=3.5;
+        if(this.inputKeys.sprint.isDown && !this.mining) var speed=5;
+        else if(!this.mining) var speed=3.5;
         if(this.angle!=this.degree){
             this.angle=this.degree;
         }
@@ -166,7 +183,8 @@ export default class Player extends Phaser.Physics.Matter.Sprite{
         if(this.inputKeys.reload.isDown){
             this.socket.emit("playerReload");
             this.reloading=true;
-            this.anims.play(this.activeWeapon+"_reload");            
+            this.anims.play(this.activeWeapon+"_reload"); 
+            this.reloadSound.play();              
             if(this.activeWeapon=="handgun") this.ammo=this.handgun_ammo=this.max_ammo;
             else if(this.activeWeapon=="rifle") this.ammo=this.rifle_ammo=this.max_ammo;
             else if(this.activeWeapon=="shotgun") this.ammo=this.shotgun_ammo=this.max_ammo;
@@ -219,12 +237,14 @@ export default class Player extends Phaser.Physics.Matter.Sprite{
                 var i=1;
                 this.on("animationrepeat",()=>{
                     if(this.canMine){
+                        if(this.mining)this.playerMining.play();
                         hitObject.increaseProgressBar(i);
                         i++;
                     }
                 });
                 this.on("animationcomplete",()=>{
                     if(this.mining){
+                        this.playerMining.play();
                         hitObject.increaseProgressBar(i);
                         i=0;           
                         this.anims.play(this.activeWeapon+"_idle",true);
@@ -262,9 +282,9 @@ export default class Player extends Phaser.Physics.Matter.Sprite{
             }
         }
         if(this.victoryText!=null){           
-            if(this.victoryText.x!=this.scene.cameras.main.worldView.x + this.scene.cameras.main.width / 2 || this.victoryText.y!=this.scene.cameras.main.worldView.y + this.scene.cameras.main.height / 2){
-                this.victoryText.x=this.scene.cameras.main.worldView.x + this.scene.cameras.main.width / 2;
-                this.victoryText.y=this.scene.cameras.main.worldView.y + this.scene.cameras.main.height / 2;
+            if(this.victoryText.x!=this.scene.cameras.main.displayWidth/2-220.5 || this.victoryText.y!=this.scene.cameras.main.displayHeight/2-55){
+                this.victoryText.x=this.scene.cameras.main.displayWidth/2-220.5;
+                this.victoryText.y=this.scene.cameras.main.displayHeight/2-55;
             }
         }     
     }
@@ -285,8 +305,12 @@ export default class Player extends Phaser.Physics.Matter.Sprite{
                     if(this.activeWeapon=="handgun") this.ammo=--this.handgun_ammo;
                     else if(this.activeWeapon=="rifle") this.ammo=--this.rifle_ammo;
                     else if(this.activeWeapon=="shotgun") this.ammo=--this.shotgun_ammo;                      
-                    if(this.activeWeapon!="shotgun")var bulletShot=new Bullet({scene:this.scene,x:this.getBottomRight().x,y:this.getBottomRight().y,texture:"bullet",frame:"bullet"},this.damage);
-                    else {
+                    if(this.activeWeapon!="shotgun"){
+                        var bulletShot=new Bullet({scene:this.scene,x:this.getBottomRight().x,y:this.getBottomRight().y,texture:"bullet",frame:"bullet"},this.damage);
+                        if(this.activeWeapon=="handgun") this.handgunShot.play();
+                        else this.rifleShot.play();
+                    }else {
+                        this.shotgunShot.play();
                         var bulletShot=new Bullet({scene:this.scene,x:this.getCenter().x,y:this.getCenter().y,texture:"shotgun_bullet",frame:""},this.damage);
                         delay(80).then(()=>bulletShot.destroy());
                     }
@@ -305,6 +329,7 @@ export default class Player extends Phaser.Physics.Matter.Sprite{
     }
     getHit(damage){
         this.actualHealth-=damage;
+        //this.playerHit.play();
         if(this.actualHealth<=0) this.actualHealth=0;
         this.playerHUD.UpdateHealth(this.actualHealth,this.maxHealth);
         if(this.actualHealth<=0){
@@ -343,13 +368,16 @@ export default class Player extends Phaser.Physics.Matter.Sprite{
     }
     defeatScreen(){   
         this.defeatText=this.scene.add.text(this.scene.cameras.main.worldView.x + this.scene.cameras.main.width / 2,this.scene.cameras.main.worldView.y + this.scene.cameras.main.height / 2,"YOU LOSE",{font:"100px Arial",fill:"red",stroke:"black",strokeThickness:2}).setOrigin(0.5);
+        this.scene.backToMenuButton();
     }
     inRange(obj,range){
         return Phaser.Math.Distance.BetweenPoints(obj, this)<range;
     }
     victoryScreen(){
-        this.victoryText=this.scene.add.text(this.scene.cameras.main.worldView.x + this.scene.cameras.main.width / 2,this.scene.cameras.main.worldView.y + this.scene.cameras.main.height / 2,"YOU WIN",{font:"100px Arial",fill:"white",stroke:"black",strokeThickness:2}).setOrigin(0.5);
-        this.scene.game.scene.pause("MainScene");
+        this.victoryText=this.scene.add.text(this.scene.cameras.main.displayWidth/2-220.5,this.scene.cameras.main.displayHeight/2-55,"YOU WIN",{font:"100px Arial",fill:"white",stroke:"black",strokeThickness:2});
+        this.victoryText.scrollFactorX=0;
+        this.victoryText.scrollFactorY=0;
+        this.scene.backToMenuButton();        
     }
 }
 function delay(time) {
